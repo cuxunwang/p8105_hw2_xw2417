@@ -19,24 +19,63 @@ This problem uses the Mr. Trash Wheel dataset.
 
 #### 1.1 Read and clean the Mr. Trash Wheel sheet.
 
-The code chunk below reads and cleans the Mr. Trash Wheel sheet:
+The code chunk below reads and cleans the Mr. Trash Wheel sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable.
 
 ```{r read_mr_trash_wheel}
 mr_trash_wheel_data = 
   readxl::read_excel(
     "data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
-    range = "A2:N338",
     sheet = "Mr. Trash Wheel",
+    range = "A2:N338"
     ) %>%
   janitor::clean_names() %>%
   drop_na(dumpster) %>% 
-  mutate(sports_balls = as.integer(sports_balls))
+  mutate(
+    date = str_sub(as.character(date), -2, -1),
+    sports_balls = as.integer(sports_balls)) %>% 
+  select(dumpster, year, month, day = date, everything()) %>% 
+  pivot_longer(
+    plastic_bottles:sports_balls,
+    names_to = "trash_category",
+    values_to = "number"
+  )
+
+mr_trash_wheel_data
 ```
 
 
 #### 1.2 Read and clean precipitation data.
 
-The code chunk below read and clean precipitation data for 2017 and 2018:
+The code chunk below read and clean precipitation data for 2017 and 2018. It omits rows without precipitation data and adds a variable year. Then, it combines precipitation datasets and convert month to a character variable.
+
+```{r read_precipitation}
+precip_data_2017 = 
+  readxl::read_excel(
+    "data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    sheet = "2017 Precipitation",
+    range = "A2:B14"
+    ) %>%
+  mutate(year = "2017") %>% 
+  janitor::clean_names() 
+
+precip_data_2018 = 
+  readxl::read_excel(
+    "data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    sheet = "2018 Precipitation",
+    range = "A2:B14"
+    ) %>%
+  mutate(year = "2018") %>% 
+  janitor::clean_names() %>% 
+  drop_na(total)
+
+precip_data = 
+  bind_rows(precip_data_2017, precip_data_2018) %>%
+  mutate(month = month.name[month]) %>% 
+  select(year, month, total_inch = total)
+
+precip_data
+```
+
 
 
 ## Problem 2
