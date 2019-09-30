@@ -15,11 +15,11 @@ This file is the solution to P8105 Homework 2 from Xun Wang (xw2417).
 
 ## Problem 1
 
-This problem uses the Mr. Trash Wheel dataset. 
+This problem uses the *Mr. Trash Wheel* dataset. 
 
 #### 1.1 Read and clean the Mr. Trash Wheel sheet.
 
-The code chunk below reads and cleans the Mr. Trash Wheel sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable.
+The code chunk below reads and cleans the *Mr. Trash Wheel* sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable.
 
 ```{r read_mr_trash_wheel}
 mr_trash_wheel_data = 
@@ -38,9 +38,8 @@ mr_trash_wheel_data =
     plastic_bottles:sports_balls,
     names_to = "trash_category",
     values_to = "number"
-  )
-
-mr_trash_wheel_data
+  ) %>% 
+  mutate(number = as.numeric(number))
 ```
 
 
@@ -72,9 +71,11 @@ precip_data =
   bind_rows(precip_data_2017, precip_data_2018) %>%
   mutate(month = month.name[month]) %>% 
   select(year, month, total_inch = total)
-
-precip_data
 ```
+
+**Comments on cleaning data:** Both the *Mr. Trash Wheel* and the *precipitation* datasets are cleaned by `janitor::clean_names`. The *Mr. Trash Wheel* data is also tidied by `pivot_longer` (I combined all the different trash types into one column named *trash_category* and put the values to the column *number*). Since there are column *year* and *month* already, I simplied the *date* column to *day* column only leaving the "day" information in this column.
+
+**Comments on the data:** In the *Mr. Trash Wheel* dataset, there are `r max(pull(mr_trash_wheel_data, dumpster))` observations between 5/16/2014 and 7/18/2018 for 7 categories of trash. The total weight and volume of trash, and the home number the trash powered in each observation are also recorded.For example, on 5/15/2015 in dumpster 60, the total trash weighed 1.95 tons and had a volume of 9 cubic yards, which was used to power 33 homes (key variables). In the *precipitation* dataset, there are `r nrow(precip_data)` observations between `r pull(precip_data, month)[1]` `r pull(precip_data, year)[1]` and `r rev(pull(precip_data, month))[1]` `r rev(pull(precip_data, year))[1]`.For each observation, the total inches of the precipitation was recored. For example, in `r pull(precip_data, month)[1]` `r pull(precip_data, year)[1]`, the precipitation was `r pull(precip_data, total_inch)[1]` inches (key variables). For available data, the **total** precipitation in 2018 was **`r sum(select(filter(precip_data, year == 2018), total_inch))` inches**. The **median** number of sports balls in a dumpster in 2017 was **`r median(pull(filter(mr_trash_wheel_data, year == 2017 & trash_category == 'sports_balls'), number))`**.
 
 
 
