@@ -119,7 +119,6 @@ The code chunk below reads and cleans the data in unemployment.csv. To make the 
 ```{r read_unemployment}
 unemploy_data = 
   read.csv(file = "./data/fivethirtyeight_datasets/unemployment.csv") %>% 
-  ##janitor::clean_names() %>% 
   pivot_longer(
     Jan:Dec,
     names_to = "month",
@@ -152,3 +151,24 @@ The `unemploy_data` has `r nrow(unemploy_data)` rows and `r ncol(unemploy_data)`
 Since the `pols_data` has the most information, I did `left_join` to merge the `snp_data` and the `unemploy_data` into the `pols_data` one by one. Then any row with a missing value was removed. The resulting dataset `pols_snp_unemploy` has **`r nrow(pols_snp_unemploy)` rows** and **`r ncol(pols_snp_unemploy)` columns**, ranging from **`r pull(pols_snp_unemploy, month)[1]` `r pull(pols_snp_unemploy, year)[1]`** to **`r rev(pull(pols_snp_unemploy, month))[1]` `r rev(pull(pols_snp_unemploy, year))[1]`**. The **key** varibales are *year* and *month*. And the resulting dataset gives us whether the president was republican or democratic, the numbers of republican / democratic governors / senators / representatives, the closing values of the S&P stock index, and the percentage of unemployment in a specific year and month.
 
 ## Problem 3
+
+This problem uses the *NYC Open* data on the popularity of baby names. 
+
+#### 3.1 Read and clean the dataset.
+
+The code chunk below reads and cleans the *Popular_Baby_Names.csv*. 
+
+```{r read_baby_names}
+baby_name_data = 
+  read.csv(file = "./data/Popular_Baby_Names.csv") %>%
+  janitor::clean_names() %>% 
+  mutate(
+    gender = str_to_lower(gender),
+    ethnicity = str_to_lower(ethnicity),
+    child_s_first_name = str_to_lower(child_s_first_name)
+    ) %>% 
+  distinct()
+  
+```
+
+
