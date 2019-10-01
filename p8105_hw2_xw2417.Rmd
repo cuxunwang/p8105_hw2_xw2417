@@ -156,7 +156,7 @@ This problem uses the *NYC Open* data on the popularity of baby names.
 
 #### 3.1 Read and clean the dataset.
 
-The code chunk below reads and cleans the *Popular_Baby_Names.csv*. 
+The code chunk below reads and cleans the *Popular_Baby_Names.csv*. To make the format clean, all the variable names are cleaned by `janitor::clean_names` and all the string variables are converted to lower cases by `str_to_lower`. Some of the *ethnicity* values are written in different ways (e.g. "asian and pacific islander" vs "asian and paci), so they need to be converted to the same way by `replace`. Some rows seem duplicated, and these duplicated rows are removed by `distinct`.
 
 ```{r read_baby_names}
 baby_name_data = 
@@ -165,10 +165,25 @@ baby_name_data =
   mutate(
     gender = str_to_lower(gender),
     ethnicity = str_to_lower(ethnicity),
-    child_s_first_name = str_to_lower(child_s_first_name)
+    child_s_first_name = str_to_lower(child_s_first_name),
+    ethnicity = replace(ethnicity, ethnicity == "asian and paci", "asian and pacific islander"),
+    ethnicity = replace(ethnicity, ethnicity == "black non hisp", "black non hispanic"),
+    ethnicity = replace(ethnicity, ethnicity == "white non hisp", "white non hispanic")
     ) %>% 
   distinct()
-  
 ```
 
+#### 3.2 Reader-friendly tables creation.
 
+The code chunk below produces a well-structured, reader-friendly table showing the rank in popularity of the name “Olivia” as a female baby name over time with rows for ethnicities and columns for year.
+
+```{r olivia_table}
+olivia_data = 
+  filter(baby_name_data, gender == "female", child_s_first_name == "olivia") %>% 
+  select(year_of_birth, ethnicity, rank) %>% 
+  pivot_wider(
+    names_from = "year_of_birth", 
+    values_from = "rank")
+
+knitr::kable(olivia_data, format = "html", caption = "Table 1: Popularity rank of “Olivia” as a female baby name over time")
+```
