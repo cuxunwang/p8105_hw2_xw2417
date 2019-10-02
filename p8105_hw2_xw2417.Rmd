@@ -9,6 +9,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+
 ```
 
 This file is the solution to P8105 Homework 2 from Xun Wang (xw2417).
@@ -19,7 +20,7 @@ This problem uses the *Mr. Trash Wheel* dataset.
 
 #### 1.1 Read and clean the Mr. Trash Wheel sheet.
 
-The code chunk below reads and cleans the *Mr. Trash Wheel* sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable.
+The code chunk below reads and cleans the *Mr. Trash Wheel* sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable. Only the first 5 rows of the cleaned data are printed.
 
 ```{r read_mr_trash_wheel}
 mr_trash_wheel_data = 
@@ -40,6 +41,8 @@ mr_trash_wheel_data =
     values_to = "number"
   ) %>% 
   mutate(number = as.numeric(number))
+
+head(mr_trash_wheel_data, n = 5)
 ```
 
 
@@ -71,6 +74,8 @@ precip_data =
   bind_rows(precip_data_2017, precip_data_2018) %>%
   mutate(month = month.name[month]) %>% 
   select(year, month, total_inch = total)
+
+precip_data
 ```
 
 #### 1.3 Comments.
@@ -89,7 +94,7 @@ This problem uses the *FiveThirtyEight* dataset.
 
 #### 2.1 Read and clean the datasets.
 
-The code chunk below reads and cleans the data in pols-month.csv. Note that there are some "2"s in the *prez_gop* data, and I consider those observations as "1"s.
+The code chunk below reads and cleans the data in pols-month.csv. Note that there are some "2"s in the *prez_gop* data, and I consider those observations as "1"s. Only the first 5 rows of the cleaned data are printed.
 
 ```{r read_pols_month}
 party = c("dem", "gop", "gop")
@@ -101,9 +106,11 @@ pols_data =
   mutate(month = month.name[as.integer(month)],
          president = party[prez_gop + 1]) %>%
   select(year, month, president, everything(), -day, -prez_dem, -prez_gop)
+
+head(pols_data, n = 5)
 ```
 
-The code chunk below reads and cleans the data in snp.csv. To make the variable name more clear, variable name *close* is repalced by *snp_index*.
+The code chunk below reads and cleans the data in snp.csv. To make the variable name more clear, variable name *close* is repalced by *snp_index*. Only the first 5 rows of the cleaned data are printed.
 
 ```{r read_snp}
 snp_data = 
@@ -112,9 +119,11 @@ snp_data =
   separate(date, into = c("month", "day", "year")) %>% 
   mutate(month = month.name[as.integer(month)]) %>% 
   select(year, month, snp_index = close)
+
+head(snp_data, n = 5)
 ```
 
-The code chunk below reads and cleans the data in unemployment.csv. To make the variable name more clear, variable name *percentage* is repalced by *unemploy_percentage*.
+The code chunk below reads and cleans the data in unemployment.csv. To make the variable name more clear, variable name *percentage* is repalced by *unemploy_percentage*. Only the first 5 rows of the cleaned data are printed.
 
 ```{r read_unemployment}
 unemploy_data = 
@@ -127,17 +136,21 @@ unemploy_data =
   mutate(month = month.name[match(pull(., month), month.abb)],
          Year = as.character(Year)) %>% 
   select(year = Year, month, unemploy_percentage = percentage)
+
+head(unemploy_data, n = 5)
 ```
 
 #### 2.2 Join the datasets.
 
-The code chunk below merges `snp` into `pols` by `left_join`, and then merges `unemployment` into the result by `left_join` again. Because the `pols` data has the longest time span, so most information would be kept if the other 2 datasets are **left joined** into the `pols` dataset. 
+The code chunk below merges `snp` into `pols` by `left_join`, and then merges `unemployment` into the result by `left_join` again. Because the `pols` data has the longest time span, so most information would be kept if the other 2 datasets are **left joined** into the `pols` dataset. Only the first 5 rows of the cleaned data are printed.
 
 ```{r join_538_datasets}
 pols_snp_unemploy = 
   left_join(pols_data, snp_data, by = c("year", "month")) %>% 
   left_join(unemploy_data, by = c("year", "month")) %>% 
   drop_na(snp_index, unemploy_percentage)
+
+head(pols_snp_unemploy, n = 5)
 ```
 
 #### 2.3 Comments.
@@ -156,7 +169,7 @@ This problem uses the *NYC Open* data on the popularity of baby names.
 
 #### 3.1 Read and clean the dataset.
 
-The code chunk below reads and cleans the *Popular_Baby_Names.csv*. To make the format clean, all the variable names are cleaned by `janitor::clean_names` and all the string variables are converted to lower cases by `str_to_lower`. Some of the *ethnicity* values are written in different ways (e.g. "asian and pacific islander" vs "asian and paci), so they need to be converted to the same way by `replace`. Some rows seem duplicated, and these duplicated rows are removed by `distinct`.
+The code chunk below reads and cleans the *Popular_Baby_Names.csv*. To make the format clean, all the variable names are cleaned by `janitor::clean_names` and all the string variables are converted to lower cases by `str_to_lower`. Some of the *ethnicity* values are written in different ways (e.g. "asian and pacific islander" vs "asian and paci), so they need to be converted to the same way by `replace`. Some rows seem duplicated, and these duplicated rows are removed by `distinct`. Only the first 5 rows of the cleaned data are printed.
 
 ```{r read_baby_names}
 baby_name_data = 
@@ -171,6 +184,8 @@ baby_name_data =
     ethnicity = replace(ethnicity, ethnicity == "white non hisp", "white non hispanic")
     ) %>% 
   distinct()
+
+head(baby_name_data, n = 5)
 ```
 
 #### 3.2 Reader-friendly tables creation.
@@ -199,5 +214,27 @@ popular_male_name =
     values_from = "child_s_first_name")
 
 knitr::kable(popular_male_name, format = "html", caption = "Table 2: Most popular male children name over time")
+```
+
+#### 3.3 Scatter plot creation.
+
+The code chunk below produces a scatter plot showing the number of children with a name (y) against the rank in popularity of that name (x) for male, white non-hispanic children born in 2016.
+
+```{r scatter_plot}
+scatter_plot_data = 
+  filter(
+    baby_name_data, 
+    year_of_birth == "2016", 
+    gender == "male", 
+    ethnicity == "white non hispanic") %>% 
+  select(rank, count)
+
+ggplot(scatter_plot_data, aes(x = rank, y = count)) + 
+  geom_point() +
+  labs(
+    title = "Baby boy name popularity plot",
+    x = "Rank in popularity of a name",
+    y = "Number of children with a name"
+  )
 ```
 
