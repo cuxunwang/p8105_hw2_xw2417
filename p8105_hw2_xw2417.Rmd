@@ -20,14 +20,14 @@ This problem uses the *Mr. Trash Wheel* dataset.
 
 #### 1.1 Read and clean the Mr. Trash Wheel sheet.
 
-The code chunk below reads and cleans the *Mr. Trash Wheel* sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable. Only the first 5 rows of the cleaned data are printed.
+The code chunk below reads and cleans the *Mr. Trash Wheel* sheet. It omits non-data entrues and rows not including dumpster-specific data, and rounds the number of sports balls to the nearest integer and converts the result to an integer variable.
 
 ```{r read_mr_trash_wheel}
 mr_trash_wheel_data = 
   readxl::read_excel(
-    "data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    "data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
     sheet = "Mr. Trash Wheel",
-    range = "A2:N338"
+    range = "A2:N408"
     ) %>%
   janitor::clean_names() %>%
   drop_na(dumpster) %>% 
@@ -42,7 +42,7 @@ mr_trash_wheel_data =
   ) %>% 
   mutate(number = as.numeric(number))
 
-head(mr_trash_wheel_data, n = 5)
+mr_trash_wheel_data
 ```
 
 
@@ -53,7 +53,7 @@ The code chunk below read and clean precipitation data for 2017 and 2018. It omi
 ```{r read_precipitation}
 precip_data_2017 = 
   readxl::read_excel(
-    "data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    "data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
     sheet = "2017 Precipitation",
     range = "A2:B14"
     ) %>%
@@ -62,13 +62,12 @@ precip_data_2017 =
 
 precip_data_2018 = 
   readxl::read_excel(
-    "data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    "data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
     sheet = "2018 Precipitation",
     range = "A2:B14"
     ) %>%
   mutate(year = "2018") %>% 
-  janitor::clean_names() %>% 
-  drop_na(total)
+  janitor::clean_names()
 
 precip_data = 
   bind_rows(precip_data_2017, precip_data_2018) %>%
@@ -82,7 +81,7 @@ precip_data
 
 **Comments on cleaning data:** Both the *Mr. Trash Wheel* and the *precipitation* datasets are cleaned by `janitor::clean_names`. The *Mr. Trash Wheel* data is also tidied by `pivot_longer` (I combined all the different trash types into one column named *trash_category* and put the values to the column *number*). Since there are column *year* and *month* already, I simplied the *date* column to *day* column only leaving the "day" information in this column.
 
-**Comments on the data:** The *Mr. Trash Wheel* dataset has `r nrow(mr_trash_wheel_data)` rows and `r ncol(mr_trash_wheel_data)` columns. There are `r max(pull(mr_trash_wheel_data, dumpster))` observations between 5/16/2014 and 7/18/2018 for 7 categories of trash. The total weight and volume of trash, and the home number the trash powered in each observation are also recorded. The **key** variable is the *dumpster* number. 
+**Comments on the data:** The *Mr. Trash Wheel* dataset has `r nrow(mr_trash_wheel_data)` rows and `r ncol(mr_trash_wheel_data)` columns. There are `r max(pull(mr_trash_wheel_data, dumpster))` observations between 5/16/2014 and 6/17/2019 for 7 categories of trash. The total weight and volume of trash, and the home number the trash powered in each observation are also recorded. The **key** variable is the *dumpster* number. 
 
 The *precipitation* dataset has `r nrow(precip_data)` rows and `r ncol(precip_data)` columns. There are `r nrow(precip_data)` observations between `r pull(precip_data, month)[1]` `r pull(precip_data, year)[1]` and `r rev(pull(precip_data, month))[1]` `r rev(pull(precip_data, year))[1]`. For each observation, the total inches of the precipitation was recored. The **key** variables are the *year* and *month*. 
 
